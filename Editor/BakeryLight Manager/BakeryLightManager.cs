@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 
+#if BAKERY_INCLUDED
+
 public class BakeryLightManagerWindow : EditorWindow
 {
     private List<Light> directionalLights = new List<Light>();
@@ -241,3 +243,24 @@ public class BakeryLightManagerWindow : EditorWindow
         light.gameObject.tag = "EditorOnly";
     }
 }
+
+#else
+
+public class BakeryLightManagerWindow : EditorWindow
+{
+    [MenuItem("ValenVRC/Tools/Bakery Light Manager")]
+    public static void ShowWindow()
+    {
+        GetWindow<BakeryLightManagerWindow>("Bakery Light Manager");
+    }
+
+    private void OnGUI()
+    {
+        EditorGUILayout.Space(8);
+        EditorGUILayout.LabelField("Bakery is not detected in this project.", EditorStyles.boldLabel);
+        EditorGUILayout.Space(4);
+        EditorGUILayout.HelpBox("Please install Bakery from the Asset Store and ensure it's properly set up to use the Bakery Light Manager tool.", MessageType.Warning);
+    }
+}
+
+#endif
