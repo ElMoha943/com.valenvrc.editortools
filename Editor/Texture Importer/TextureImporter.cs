@@ -83,6 +83,8 @@ public class TextureRule
     
     public bool overrideReadWrite = false;
     public bool readWrite = false;
+
+    public bool clearPlatformOverride = false;
 }
 
 [System.Serializable]
@@ -554,6 +556,13 @@ public class TextureImporterWindow : EditorWindow
                 rule.readWrite = EditorGUILayout.Toggle("Read/Write Enabled", rule.readWrite);
                 EditorGUI.indentLevel--;
             }
+
+            EditorGUILayout.Space();
+            rule.clearPlatformOverride = EditorGUILayout.Toggle("Clear Platform Override", rule.clearPlatformOverride);
+            if (rule.clearPlatformOverride)
+            {
+                EditorGUILayout.HelpBox("Removes ALL platform-specific overrides for the selected platform, reverting to default import settings.", MessageType.Warning);
+            }
             
             EditorGUI.EndDisabledGroup();;
             
@@ -894,11 +903,18 @@ public class TextureImporterWindow : EditorWindow
             }
         }
         
+        if (rule.clearPlatformOverride)
+        {
+            texture.importer.ClearPlatformTextureSettings(platformName);
+            return true;
+        }
+
         if (rule.overrideMaxSize)
         {
-            bool shouldApply = !rule.onlyOverrideWhenLarger || platformSettings.maxTextureSize > rule.maxSize;
+            int effectiveMaxSize = platformSettings.overridden ? platformSettings.maxTextureSize : texture.importer.maxTextureSize;
+            bool shouldApply = !rule.onlyOverrideWhenLarger || effectiveMaxSize > rule.maxSize;
             
-            if (shouldApply && platformSettings.maxTextureSize != rule.maxSize)
+            if (shouldApply && effectiveMaxSize != rule.maxSize)
             {
                 platformSettings.overridden = true;
                 platformSettings.maxTextureSize = rule.maxSize;
